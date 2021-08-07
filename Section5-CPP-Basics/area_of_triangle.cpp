@@ -5,11 +5,13 @@ using namespace std;
 
 int area(int base, int height)
 {
+    // a = ½bh
     return (base * height) / 2;
 }
 
 int areaHeronsFormula(int a, int b, int c)
 {
+    // a = √(s(s - a)(s - b)(s - c))
     int s = (a + b + c) / 2;
     int area = sqrt(s * (s - a) * (s - b) * (s - c));
     return area;
