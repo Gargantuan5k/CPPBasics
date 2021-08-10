@@ -1,6 +1,6 @@
-Write-Host "Running git commit & push script"
-
 param ([string]$m = "Commit to git")
+
+Write-Host "Running git commit & push script"
 
 git add .
 git commit -m $m
