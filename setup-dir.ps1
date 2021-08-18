@@ -2,8 +2,8 @@
 .Description
 A PowerShell Script to setup a new Section directory for this project
 #>
-
 param ([string] $name="New Section", [string] $com="n", [string] $path=".")
+
 
 Write-Host "Running new dir setup..." -fore yellow
 
@@ -15,7 +15,7 @@ Write-Output "/*.exe" >> ./.gitignore | Out-Null
 Write-Output "/*.out" >> ./.gitignore | Out-Null
 Set-Location ./.. | Out-Null
 
-Write-Host "Created new directory '" $name "'" -fore green
+Write-Host "Created new directory '"$name"'" -fore green
 Write-Host "Created file .gitignore in", $name -fore green
 
 if ($com -eq "y") {
