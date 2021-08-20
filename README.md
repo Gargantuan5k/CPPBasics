@@ -37,8 +37,8 @@ g++ first_program.cpp -o ./bin/first_program
 ``` 
 [NOTE] A <a href="https://github.com/Gargantuan5k/CPPBasics/tree/master/.vscode/tasks.json">VSCode build task</a> has been configured for this project. If you're using VSCode as an IDE, <br />
 You can configure the <a href="https://github.com/Gargantuan5k/CPPBasics/tree/master/.vscode/tasks.json">tasks.json</a> file to output a particular kind of executable (Default is windows .exe), then<br /> 
-Press <kb>Ctrl</kb>+<kb>Shift</kb>+<kb>B</kb> (Windows/Linux)<br />
-Or <kb>⇧</kb><kb>⌘</kb>B</kb> (MacOS) to run the Build task.
+Press <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>B</kbd> (Windows/Linux)<br />
+Or <kbd>⇧</kbd><kbd>⌘</kbd>B</kbd> (MacOS) to run the Build task.
 <br />
 
 5. [EXECUTION] Run the compiled binary file
