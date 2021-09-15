@@ -45,5 +45,10 @@
         "stdexcept": "cpp",
         "streambuf": "cpp",
         "typeinfo": "cpp"
+    },
+    "actionButtons": {
+        "defaultColor": "#78bab6",
+        "loadNpmCommands": false,
+        
     }
 }
