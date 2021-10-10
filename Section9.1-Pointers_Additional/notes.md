@@ -57,13 +57,13 @@ Setting a pointer to the address of a variable using the `&` symbol is called **
 
 > The asterisk (`*`) refers to the *value* at a given pointer.
 ---
-### Recap so far
+### 1.2 Recap so far
 - Pointers are variables that store memory addresses of other variables and can refer to them.
 - Variables can be declared as pointers by prefixing the name with an asterisk (`*`).
 - Pointers can be initialized with the memory address of another variable. This address can be found using the ampersand (`&`) symbol, for example: `int x = 10, *p; p = &x;`
 - Printing a pointer directly (without *dereferencing*) will print the memory address of the pointer. Dereferencing the pointer by prefixing with an asterisk (`*`) will print the value at the memory address stored in the pointer.
 ---
-### A small exercise :)
+### 1.3 A small exercise :)
 > Give the outputs of the following programs:
 ```cpp
 int x, *p;
@@ -98,7 +98,7 @@ Pointers work :D
 */
 ```
 
-### 1.2 Why are pointers strongly typed?
+### 1.4 Why are pointers strongly typed?
 Pointers must be declared with type names; i.e they are strongly typed. This is because a pointer is meant to be able to
 dereference the value at the address stored in itself. 
 
@@ -132,7 +132,7 @@ When we dereference the pointer `p`, the `int` type tells the compiler to look a
 
 Similarly, a `char` pointer will look at 1 byte, a `double` pointer will look at 8 bytes etc.
 
-### Pointers to pointers
+### 1.5 Pointers to pointers
 Pointers can also point to the address of other pointers. For example, let's take the following C++ code:
 ```cpp
 #include <iostream>
@@ -178,7 +178,7 @@ When we run the given code snippet, the output should be something like this:
 - And the final statement (`cout << **q << endl;`) will print the value stored at `*q`. As explained in the previous point, `*q` is the address of `x`, so this line will print the *value of `x`*, i.e. `5`.
 > Note that `**q` can also be written as `*(*q)`. using the order of operations in parentheses, you might find it easier to understand the last point.
 
-### Pointers to pointers to pointers
+### 1.6 Pointers to pointers to pointers (and more)
 Similar to how we declared a pointer to a pointer above, we can declare pointers to pointers to pointers, simply by adding another asterisk.
 ```cpp
 int x = 10;
@@ -198,7 +198,7 @@ cout << ***r // prints the value stored at **r, i.e. 5. This is the same as cout
 
 ---
 
-# 2. A pointer use-case: As function arguments (Call by reference)
+## 2. A pointer use-case: As function arguments (Call by value and call by reference)
 Let's take an example of a script:
 ```cpp
 #include <iostream>
@@ -294,3 +294,24 @@ Value of num after calling function: 11
 As you can see, this behaved as we needed it to. The `increment` function accesses the actual memory address of the variable and changes its value, which is made possible by calling the function by reference.
 
 ---
+## 3. Pointers and Arrays
+Pointers and Arrays in C/C++ are very closely related. Let's take an example to work through this part:
+```cpp
+#include <iostream>
+using namespace std;
+
+int main()
+{
+    int myArray[5] = {3, 6, 8, 9, 10};
+}
+```
+
+We declared an integer array of length 5. In modern compilers, integers are given `4B` of storage. This means our array might look something like this in memory:
+
+| Variable Name | Memory Address (decimal) | Memory address (hex) |
+|---------------|--------------------------|----------------------|
+| `myArray[0]`  | `200`                    | `c8`                 |
+| `myArray[1]`  | `204`                    | `cc`                 |
+| `myArray[2]`  | `208`                    | `d0`                 |
+| `myArray[3[`  | `212`                    | `d4`                 |
+| `myArray[4]`  | `216`                    | `d8`                 |
