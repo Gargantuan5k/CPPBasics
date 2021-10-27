@@ -44,7 +44,8 @@
         "sstream": "cpp",
         "stdexcept": "cpp",
         "streambuf": "cpp",
-        "typeinfo": "cpp"
+        "typeinfo": "cpp",
+        "bitset": "cpp"
     },
     "actionButtons": {
         "defaultColor": "#78bab6",
