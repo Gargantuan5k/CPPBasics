@@ -314,7 +314,7 @@ We declared an integer array of length 5. In modern compilers, integers are give
 | `myArray[0]`  | `200`                    | `c8`                 |
 | `myArray[1]`  | `204`                    | `cc`                 |
 | `myArray[2]`  | `208`                    | `d0`                 |
-| `myArray[3[`  | `212`                    | `d4`                 |
+| `myArray[3]`  | `212`                    | `d4`                 |
 | `myArray[4]`  | `216`                    | `d8`                 |
 
 > When we say the memory address is `204`, we mean that the integer is stored in 4 bytes, from `204` to `207` (inclusive).
@@ -405,7 +405,7 @@ The above example uses pointer arithmetic to access each element of the array.
 
 ---
 
-### 3.1. Arrays as Function arguments
+### 3.1 Arrays as Function arguments
 
 When we try to pass an array as an argument to a function, we get some interesting behaviour. To see this, let's say we want a function to find the sum of all elements in an array:
 
@@ -549,3 +549,360 @@ Doubled array: 2 4 6 8 10
 ```
 ---
 
+### 3.2 Pointers and character arrays
+When we talk about *strings* in C++, we need to think about character arrays. Strings are stored as arrays of individual characters.
+
+In order to store a sting inside a character array, we must first have a character array of the required size. This must be greater than or equal to the size length of the string *plus 1*. For example, while storing a string "Lorem", we see that the string is 5 characters long, so we need a char array of length 6 at minimum.
+
+```cpp
+char myStr[6] = "Lorem";
+```
+
+We can see by printing this array using a for loop, that each character in the string "Lorem" is saved as an individual character inside the array:
+
+```cpp
+char myStr[6] = "Lorem";
+for (char i : myStr)
+{
+    std::cout << i << std::endl;
+}
+```
+
+But why do we need an extra byte of space in our array? Well, the last byte inside a character array is used by the compiler to determine *where the string terminates*. The compiler looks for a **null character** `('\0')` and assumes that the string ends at that character.
+
+If we don't put a null character at the end of a string, garbage values stored next to the string will affect operations on it. This can be seen in the following example:
+
+```cpp
+char myCharArray[5];
+myCharArray[0] = 'L';
+myCharArray[1] = 'o';
+myCharArray[2] = 'r';
+myCharArray[3] = 'e';
+myCharArray[4] = 'm';
+
+cout << myCharArray << endl;
+```
+
+The output will be something like this:
+
+```
+Lorem�@
+```
+
+Which is our expected value, along with garbage at the end. To fix this, we'll have to append a '\0' char at the end of the array.
+
+```cpp
+char myCharArray[6];
+myCharArray[0] = 'L';
+myCharArray[1] = 'o';
+myCharArray[2] = 'r';
+myCharArray[3] = 'e';
+myCharArray[4] = 'm';
+myCharArray[5] = '\0';
+```
+
+> Note that when you declare a string while initialising it, as in `char myCharArray[6] = "Lorem";`, the compiler will implicitly add a `\0` character at the end. However, the array must still be of the proper length as discussed above.
+
+It may be noticed, that all methods and functions that manipulate strings, expect them to be in the form of character arrays terminating with a null character. For example, the `strlen()` function in the `<cstring>` (or `<string.h>` in C) library.
+
+```cpp
+#include <iostream>
+#include <cstring>
+using namespace std;
+
+int main()
+{
+    char myStr[40] = "Lorem ipsum dolor";
+    cout << "The string is " << strlen(myStr) << " characters long.";
+}
+```
+Output:
+```
+The string is 17 characters long.
+```
+
+**Some things to remember:**
+
+> Char arrays can be initialised at the time of declaration using string literals, for example `char c[3] = "hi";`
+
+> A Character array cannot be initialised with a string literal after declaration on a separate line: `char c[3]; c = "hi";` would generate an error.
+
+> While declaring and initialising on the same line, you can leave the size of the character array empty: `char c[] = "hi";` would be valid and the compiler would automatically find the correct size. You can also do this when using a character array as a function parameter.
+
+> As you may recall from earlier sections, the `sizeof()` function will return the size of a variable in bytes. Since characters take up 1 byte of space, `sizeof(aCharArrayVariable)` will return the exact length of the character array. However, this will also include the null character at the end, so it will be equal to the length of the string + 1.
+
+> A character array can also be initialised as a comma-separated list of individual characters. However null-termination will not be implicit in this case and you are expected to add a null character at the end. For example: `char c[3] = {'H', 'i', '\0'};`
+
+> An array is similar to a pointer, but is not exactly the same.
+
+Let's take a character array here, and initialise it with the string literal "Lorem".
+
+```cpp
+char myStr[] = "Lorem";
+```
+
+This may be stored in memory as follows:
+
+| Character | Memory Address |
+|-----------|----------------|
+| `'L'`     | `c8`           |
+| `'o'`     | `c9`           |
+| `'r'`     | `ca`           |
+| `'e'`     | `cb`           |
+| `'m'`     | `cc`           |
+| `'\0'`    | `cd`           |
+
+Taking a pointer to the above declared array:
+
+```cpp
+char *ptr = myStr;
+```
+Let us remember that using the name of an array returns the address of the first element. Therefore, the address `0xc8` gets stored in our pointer.
+
+We can now use the pointer to refer to our array and perform operations on its values, like so:
+```cpp
+cout << ptr[0]; // prints 'L'
+ptr[0] = 'K'; // changes string to "Korem"
+```
+This shows that referencing a pointer to an array as `ptr[i]` works the same way as `*(ptr + i)`. Referencing an array works in the same way, `myStr[i]` is the same as `*(myStr + i);`. This shows that arrays and pointers are used in similar ways.
+
+But don't be mistaken, they are not exactly the same. For example, while you can set a pointer to point to an array like `char *ptr = myStr;`, you cannot set an array to a pointer. `myStr = ptr;` is invalid. You can also not perform arithmetic directly on arrays, so statements such as `myStr++;` are invalid, while `ptr++;` is valid, and will make the pointer point to address `0xc9`. Continuously incrementing the pointer will let you traverse the elements of an array.
+
+> Arrays in function parameters act as pointers to the array, for the sake of optimisation.
+
+In the following snippet:
+
+```cpp
+#include <cstdio>
+
+void printStr(char str[])
+{
+    int i = 0;
+    while (str[i] != '\0')
+    {
+        printf("%c", str[i]);
+    }
+}
+
+int main()
+{
+    myStr = "Lorem Ipsum";
+    printStr(myStr);
+    return 0;
+}
+```
+
+In the function `(void) printStr`, the parameter `char str[]` is treated as `char *str` by the compiler, and `str[i]` is treated as `*(str + i)`.
+
+Since `str` is treated as a `char*`, we can rewrite the `printStr` function like this:
+```cpp
+void printStr(char str[])
+{
+    while (*str != '\0')
+    {
+        printf("%c", *str);
+        str++;
+    }
+}
+```
+Pointer arithmetic on `str` is valid, as it is treated as a pointer, and not an array in the function.
+
+
+### 3.21 Pointers & Character Arrays Contd.
+
+Let us once again look at the printStr program from the previous subsection:
+
+```cpp
+void printStr(char str[])
+{
+    while (*str != '\0')
+    {
+        printf("%c", *str);
+        str++;
+    }
+}
+
+int main()
+{
+    char str[20] = "Lorem";
+    printStr(str);
+
+    return 0;
+}
+```
+
+Looking once again at the memory allocation diagram:
+
+![Memory Allocation Table C/C++](https://study.com/cimages/multimages/16/memory_alloc_cpp.png)
+
+Whenever a function is called (in this case the `printStr` function), some amount of memory is allocated to the execution of that function in the *stack*. This is called the *stack frame* of that function. Let us say that in this case, address `0x64` to `0x96` is allocated to the `main` function.
+
+All the local variables inside the `main` function will be allocated space inside the stack frame; i.e. `20B` for the `str` character array (size 20). Let us say, from address `0x64` to `0x78`. When the `printStr` function is called, the execution of `main` is paused, and the called function is allocated a stack frame on top of the calling function, let's say from `0x96` to `0xaa`.
+
+The stack frame of the `printStr` function will also have a local variable `str`, of a pointer type. This will occupy `4B` of space, say from `0x9a` to `0x9d`. (Remember that the `str` variable in `main` and the one in `printStr` are not the same, they have different types, scopes and memory locations.)
+
+When `printStr` is called, the address of variable `str` from `main` is passed to the called function. (Only the address of the first element is passed, as discussed before.)
+
+Stepping through the snippet above, after the address of `str[0]` from `main` (i.e. `0x64` in our example) is passed to the called function, a char pointer at `0x9a` points to the address. While the value at the referenced address is not `\0`, the value is printed out. In this case, teh condition holds true and the first character in the array is printed.
+
+When the pointer is incremented, the address it points to is incremented by the size of the datatype. In this case, that's `char`, i.e. `1B`. The pointer `str` now points to `0x65`, the address of `str[1]` from `main`. The condition is checked again and still holds true; the second character is printed.
+
+This loop continues until `str` points to `0x69`, which has the value `'\0'` in it. When the condition is found to be false, the loop terminates and the execution of `main` is resumed. The stack frame for the `printStr` will also be deallocated, and may be reallocated later if the function is called again.
+
+> It may be noted that you can accept a constant pointer using the `const` keyword in functions to make them immutable, if you do not want to alter the values stored in the pointer array. Example: `const char *ptr`
+
+
+## 3.3 Pointers and multidimensional arrays
+First let's revise how one-dimensional arrays are stored in memory.
+
+They are stored as a contiguous block of memory, divided into adjacent cells, each of size depending on the type of the array. For an integer array of size 5, for example, it will occupy 20 bytes of space, divided into 5 cells of 4B each since a typical compiler stores integers in 4 bytes.
+
+```cpp
+int myArray[5]; // 20 bytes of space, 5 4-byte blocks
+int *ptr = &myArray; // Points to the first item in array, myArray[0]
+
+std::cout << p; // Prints address of myArray[0]
+std::cout << *p; // Prints value of myArray[0]
+std::cout << *(p + 2); // Prints value of myArray[2] (pointer arithmetic increments address it points to)
+
+// Remember that you can simply use the name of the array variable, instead of using a pointer variable in all these cases. (*(A+x) == A[x], and (A+x) == &A[x])
+// Also, you can equate a pointer to an array and not the other way 'round.
+```
+
+**Two Dimensional Array (2D)**
+
+A two dimensional array is basically an array of arrays. Declared as follows:
+```cpp
+int twoDimensional[2][3];
+```
+This declares an integer array of length 2, and each item of that array is an integer array of length 3. The total size of this array will be 3 * 4 * 2 = 24 bytes. It will be stored in memory as follows: (Address values assumed)
+
+| Address (int)   | Array item          | Value Stored             |
+|-----------------|---------------------|--------------------------|
+| `400-411 (400)` | `twoDimensional[0]` | `twoDimensional[0][0-2]` |
+| `412-423 (412)` | `twoDimensional[1]` | `twoDimensional[1][0-2]` |
+
+As we know, using the name of an array variable gives the address of its first element. In this case, lets say `int *p = twoDimensional;`.
+
+However this will give a compilation error, since the `*p` pointer expects an integer type, but the first element of `twoDimensional` is actually an int array of length 3.
+
+To create a pointer to a 2D array, we must write a statement like this:
+
+```cpp
+int (*ptr)[3] = twoDimensional;
+```
+
+This will work without errors, as the pointer now expects an int array of length 3 for its value.
+
+Let's now look at some examples of pointer arithmetic on a 2D array, using the array and pointer as declared above:
+
+> Note that in all these examples, the address has been given in decimal form for convenience. By default, C++ will show the address as a hexadecimal number unless you typecast or format it.
+
+1. `std::cout << twoDimensional;`: This will print the address of the first element in the array, i.e. 400. Same as `cout << &twoDimensional[0];`
+2. `std::cout << *twoDimensional;`: This will print the value stored at the address of the first element in the array, i.e. the address of the first element of the second dimension array: 400. Same as `cout << &twoDimensional[0][0];` or `cout << twoDimensional[0];`
+3. `std::cout << twoDimensional + 1;`: This will print the address of the second element in the first-dimension array, i.e. 412. (See the table above for the reason). Same as `cout << &twoDimensional[1];`
+4. `std::cout << *(twoDimensional + 1);`: This will print the value stored at the address of the second element in the first-dimension array, i.e the address of the first element of the second-dimension array inside `twoDimensional[1]`. Same as `cout << &twoDimensional[1][0]` or `cout << twoDimensional[1]`.
+5. `std::cout << *(twoDimensional + 1) + 2;`: This will print the address of the second index of the second-dimensional array stored inside `twoDimensional[1]`. Same as `cout << &twoDimensional[1][2];` or `cout << twoDimensional[1] + 2;`
+6. `std::cout << *(*twoDimensional + 1);`: `*twoDimensional` references the address of the first element of the second dimension of `twoDimensional[0]`, i.e. `twoDimensional[0][0]`. Adding 1 will reference `twoDimensional[0][1]`, and using `*` will print the value at that address. Theerefore this statement will print the integer value stored at `twoDimensional[0][1]`.
+   
+> For a 2-D array `A`, `A[i][j]` is the same as `*(A[i]) + j` or `*(*(A + i) + j)`. 
+
+Some of the above examples can be seen in this snippet:
+
+```cpp
+#include <iostream>
+using std::cout;
+using std::endl;
+// Tip: What I've done above (using std::cout; etc), is better practice than using namespace std directly, since it avoids polluting the workspace with
+// variable names.
+
+int main()
+{
+    int primesArray[2][3] = {{2, 3, 5}, {7, 9, 11}};
+    cout << primesArray[0][2] << endl; // Expected value: 5
+
+    int (*ptr)[3] = primesArray; // expects int array length = 3
+    cout << ptr << endl; // Expected value: Address of primesArray[0] (0x61fef4 in test case)
+    cout << *ptr << endl; // Expected value: Address of primesArray[0][0] (0x61fef4 in test case)
+    cout << *ptr + 1 << endl; // Expected: Address of primesArray[0][1] (4 bytes higher than primesArray[0][0]) (0x61fef8 in test case)
+    cout << *(ptr + 1) << endl; // Expected: Value at primesArray[1] = Address of primesArray[1][0] (12 bytes higher than primesArray[0][0]) (0x61ff00 in test)
+    cout << *(*ptr + 1) << endl; // Expected: Value at primesArray[0][1] = 3
+
+    cout << *(*(ptr + 1) + 2) << endl; // Expected: Value at primesArray[1][2] = 11
+
+    return 0;
+}
+```
+
+**3D Array**
+
+Just like a 2D array is a collection of 1D arrays, a 3D array is a collection of 2D arrays. For example:
+
+```cpp
+int primes[2][2][3] = {{{2, 3, 5}, {7, 9, 11}}, {{13, 17, 19}, {23, 29, 31}}};
+```
+
+A pointer to an integer cannot accept the above array, it must be made to expect a 2D array of size 2x3:
+
+```cpp
+int (*ptr)[2][3] = primes;
+```
+
+This array may be arranged as follows:
+| Address (int)   | Array item (1D) | Value Stored (2D) | Value Stored inside 2D array (3D) |
+|-----------------|-----------------|-------------------|-----------------------------------|
+| `400-423 (400)` | `primes[0]`     | `primes[0][0-1]`  | `primes[0][0-1][0-2]`             |
+| `424-447 (424)` | `primes[1]`     | `primes[1][0-1]`  | `primes[1][0-1][0-2]`             |
+
+Now lets look at some print statements using the above array.
+
+> Note that in all these examples, the address has been given in decimal form for convenience. By default, C++ will show the address as a hexadecimal number unless you typecast or format it.
+
+1. `cout << ptr;` Gives the address of the first element of the first dimension, i.e. 400
+2. `cout << *ptr;` Gives the value stored at the first address in the first dimension, i.e. `primes[0]`, which is a 2D array `primes[0][0-1]`, with address 400.
+3. `cout << *ptr + 1;` Adds 1 to the value obtained in Statement (2) above, so it will output the address of `primes[0][1]`, which is 412. (This is because element `primes[0][0]` is an int array of length 3, and occupies 12 bytes.)
+4. `cout << *(ptr + 1);` Will give the value stored at the second element of the first dimension. The value stored in `primes[1]` is the address of `primes[1][0-1]`, so the value will be 24 Bytes ahead of the value at Statement (1), i.e. 424.
+5. `cout << *(*(*(ptr + 1) + 1) + 2);` This rather confusing-looking statement will print the value stored at the last index of the last 3rd dimensional array, i.e. the value stored at `primes[1][1][2]`, which is 31. You can understand this statement by working your way outwards starting from the ptr + 1 value in the printed value.
+
+> ptr + 1 is the address of `primes[1]`. The value stored there is the address of `primes[1][0]`, to which we are adding 1. This references the address of `primes[1][1]`, and the asterisk outside the brackets will reference the value there. The value at `primes[1][1]` is the address of `primes[1][1][0]`, to which we add 2. This references the address of `primes[1][1][2]`. Finally, the outermost asterisk will give the *value* at `primes[1][1][2]`, which is 31 and gets printed out. Know that instead of working with so many nested references, you can simply use the 3D index of the array to print the value. `primes[1][1][3]` means the same thing as `*(*(*(ptr + 1) + 1) + 2)`, and can be used if you simply want to read/write the value in the array.
+
+These statements can be seen in the following snippet:
+```cpp
+#include <iostream>
+using std::cout;
+using std::endl;
+
+int main()
+{
+    int primes[2][2][3] = {{{2, 3, 5}, {7, 9, 11}}, {{13, 17, 19}, {23, 29, 31}}};
+    int (*ptr)[2][3] = primes;
+
+    cout << ptr << endl; // Expected: Address of primes[0] = 0x61fedc in test
+    cout << *ptr << endl; // Expected: Value at primes[0] = Address of primes[0][0] = 0x61fedc in test
+    cout << *ptr + 1 << endl; // Expected: Value at primes[0] + 1 = Address of primes[0][1] = 0x61fee8 in test
+    cout << *(ptr + 1) << endl; // Expected: Value at primes[1] = Address of primes[1][0] = 0x61ef4 in test
+    cout << *(*(*(ptr + 1) + 1) + 2) << endl; // Expected: Value at primes[1][1][2] = 31
+    cout << primes[1][1][2] << endl; // Expected: Same value as previous statement, but this one is easier to write/read 
+
+    return 0;
+}
+```
+
+### 3.31 Passing Multidimensional Arrays to functions as arguments
+We know that when a 1D array has to be passed to a function, we can write syntax like this: `int myFunction(int arrayArg[]) {}`, or this: `int myFunction(int *arrayArg) {}`. When we have to pass an array in more than 1 dimension, we can write something quite similar.
+
+Say we have three arrays as defined below:
+
+```cpp
+int oneDim[2] = {23, 67};
+int twoDim[2][2] = {{12, 54}, {34, 89}};
+int threeDim[2][2][3] = {{{45, 89, 76}, {12, 11, 54}}, {{33, 56, 98}, {99, 32, 28}}};
+```
+
+To pass the `oneDim` array to a function, the parameter may be written like: `int func(oneDimArray[]) {}`. 
+
+To pass the `twoDim` array, the parameter may be written like: `int func(twoDimArray[][2]) {}`. Note that while the size of the first dimension may be unspecified, the size of the second dimension must be specified. The variable `twoDim` cannot be passed to a function written like `int func(twoDimArray[][5]) {}`, for example.
+
+Two pass the `threeDim` array, the parameter may be written like: `int func(threeDimArray[][2][3])`. Again, the length of the first dimension may be unspecified, but the length of the other dimensions must be specified.
+
+> Note that the parameter `threeDimArray[][2][3]` may also be written like `(*threeDimArray)[2][3]`, and `twoDimArray[][2]` may also be written like `(*twoDimArray)[2]`.
