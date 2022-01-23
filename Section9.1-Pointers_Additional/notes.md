@@ -906,3 +906,348 @@ To pass the `twoDim` array, the parameter may be written like: `int func(twoDimA
 Two pass the `threeDim` array, the parameter may be written like: `int func(threeDimArray[][2][3])`. Again, the length of the first dimension may be unspecified, but the length of the other dimensions must be specified.
 
 > Note that the parameter `threeDimArray[][2][3]` may also be written like `(*threeDimArray)[2][3]`, and `twoDimArray[][2]` may also be written like `(*twoDimArray)[2]`.
+
+## 4. Pointers and Dynamic Memory
+As we learnt before, memory allocated to a program can be divided into four segments. These are the Code/Text segment, the Global/Static segment, the *Stack* and the *Heap*. All these segments have different purposes.
+
+1. The *Code* segment is used to store the instructions which are to be executed during a program. This has a fixed size which is calculated during compilation.
+2. The *Global* segment is used to store the global (or static) variables which are accessible throughout the program and remain accessible at all times during execution.
+3. The *Stack* segment stores data related to function calls and variables with local scopes which can only be accessed inside specific functions. The size of the Stack is also fixed as calculated during compilation, and does not change during execution.
+    > When you try to store data inside the stack, some of the space inside will get used up, and gets cleared after the scope is lost. However, if you try to store more and more data dynamically during execution inside the stack, the call stack may grow beyond the allocated size. Then the program faces a *Stack overflow* error, which will cause the application to crash.
+4. The *Heap* is used as a free pool of memory, where data can be stored dynamically. More elaboration later.
+
+Let's now see how the Code, Global and Stack segments work in action. See the following program:
+
+```cpp
+#include <iostream>
+using std::cout;
+using std::endl;
+
+int total;
+
+int sq(int x)
+{
+    return x * x;
+}
+
+int sqOfSum(int x, int y)
+{
+    return sq(x + y);
+}
+
+int main()
+{
+    int a = 4, b = 8;
+    total = sqOfSum(a, b);
+    cout << "Square of sum is " << total << endl;
+
+    return 0;
+}
+```
+
+
+![Memory structure diagram 1](https://i.imgur.com/DnVkv6a.png)
+When the program starts executing, the main() function is at the top of the stack, and therefore is executed. Variables `(int) a` and `(int) b` are stored within its stack frame.
+
+When we call `sqOfSum()`, the execution of `main()` is paused, that function is moved to the top of the stack and its local variables are stored. The `sqOfSum()` function calls another function `sq()` within itself. When that function is called, it is moved to the top of the stack and `sqOfSum()` is paused.
+
+Once `sq()` has finished executing, it is *popped* from the stack and its local variables cleared. The execution of `sqOfSum()` is resumed. Once `sqOfSum()` reaches its return statement, it is also popped and `main()` is resumed. When `main()` reaches the `return 0;` statement, it is also popped and the stack is cleared. As there are no more functions to execute, all the memory given to the program is cleared and execution finishes.
+
+
+There are some limitations, as may be obvious, to using the call stack to store data. For example, the stack operates on a fixed rule wherein the called function is pushed to the top and all others are paused. It is not possible to manipulate the execution scope in the stack.  Also, if you want a dynamically allocated datatype, such as an array that may grow during execution based on some rules or user inputs, the stack is not suitable for it; you need to define the array's size.
+
+For such cases, the Heap segment is useful. Unlike the stack, heap does not have a fixed size, instead it may be seen as a pool of all the free memory available in the machine at the application's disposal. This makes dynamic memory allocation a possibility, as there is no need to know the size of a data structure at compile time. The heap can grow as long as there is any amount of memory left in the system. This also makes using the heap risky, as you may end up exhausting all the system memory through buggy code.
+
+The heap is also called *dynamic memory*, as it can grow and shrink during execution. Using the heap in an application is called *dynamic memory allocation*. Let us now see how the heap is used in a C/C++ program.
+
+> Note that 'heap' is also a type of data structure. The Heap segment of memory is not related in any way to the Heap Data Structure.
+> There is also a data structure called the 'stack', but the Stack memory segment is actually an implementation of the Stack data structure. This is not the case with Heap.
+
+### 4.1 Malloc, Calloc, Realloc, Free
+
+To use dynamic memory in C/C++, we must know about four functions. These are:
+1. `malloc()`
+2. `calloc()`
+3. `realloc()`
+4. `free()`
+   
+C++ also has two operators related to dynamic memory, these are
+1. `new`
+2. `delete`
+
+(The `new` and `delete` operators are not present in C)
+
+
+#### 4.11 Malloc/new and Free/delete
+
+Let us check out a program:
+
+```cpp
+#include <cstdlib>
+#include <cstdio>
+
+int main()
+{
+    int *p;
+    p = (int *)malloc(sizeof(int)); // Allocate 4B for integer, use pointer p
+    *p = 69;
+
+    printf("The address that p points to: %d\nThe value stored there: %d\n", p, *p);
+    free(p);
+    printf("The address that p points to: %d\nThe value stored there (will be garbage now, after freeing): %d\n", p, *p);
+
+    p = (int *)malloc(sizeof(int) * 3); // Allocate 12B for 3 integers in array, use pointer p
+    p[0] = 69;
+    p[1] = 4;
+    p[2] = 20;
+
+    printf("The address that p points to: %d\nThe values in array: ", p);
+    for (int i = 0; i < 3; i++)
+    {
+        printf("%d ", *(p + i));
+    }
+    free(p);
+    printf("\nThe address that p points to: %d\nThe value stored there (will be garbage now, after freeing): %d\n", p, *p);
+
+    return 0;
+}
+```
+
+> Note that the above code is written for C++, but uses C-style syntaxes and libraries. By changing the include statements to <stdio.h> and <stdlib.h>, the code can be made C-compatible.
+
+In line 7, the `malloc` statement allocates a block of memory in the heap, of size 4B (integer). It returns a *void pointer* to that block of memory, which must then be typecast to `int *` so that it can be referenced by an int pointer.
+
+
+Then we can store a value at that location by dereferencing it, as done in line 8.
+
+
+We can then access the value and address the pointer points to as normal.
+
+
+The `free` function will free up the block of dynamic memory that was previously allocated by `malloc`. It takes the address (in this case, an int pointer) as its argument.
+
+
+After freeing the memory, the pointer still points to the same location, but the value at that location will be some garbage value.
+
+
+`malloc` can also allocate blocks of memory for arrays. This is done by multiplying the size of one block by the number of elements required, as done in line 14 (`sizeof(int) * 3` will give value 8B). We again cast the returned value to the required `int` type. The array can then be accessed as usual using indices, and should be freed using the `free` function after we're done using it.
+
+
+While the above code is perfectly fine, it follows C-standards. C++ offers operators `new` and `delete`, which perform roughly the same function as `malloc` and `free`. The advantage is that these are operators and not functions, which makes them faster. Let's now rewrite the above code to use these operators:
+
+```cpp
+#include <iostream>
+using std::cout;
+using std::endl;
+
+int main()
+{
+    int *p;
+    p = new int;
+    *p = 69;
+
+    cout << "The address that p points to: " << p << "\nThe value stored there: " << *p << endl;
+    delete p;
+    cout << "The address that p points to: " << p << "\nThe value stored there (garbage after deleting): " << *p << endl;
+
+    p = new int[3];
+    p[0] = 69;
+    p[1] = 4;
+    p[2] = 20;
+
+    cout << "The address that p points to: " << p << "\nThe values in array: " << endl;
+    for (int i = 0; i < 3; i++)
+    {
+        cout << p[i] << " ";
+    }
+    delete[] p;
+    cout << "\nThe address that p points to: " << p << "\nThe value stored there (garbage after deleting): " << *p << endl;
+
+    return 0;
+}
+```
+
+This code works exactly the same as the previous C-Style example. However, we have used the `new` and `delete` keywords (as well as `iostream` statements instead of `stdio`).
+
+
+`new` works the same way as malloc, it allocates dynamic memory. However the difference is that `new` is type-safe, i.e. it takes the type as an argument and returns a pointer of the correct type. This eliminates the need to cast the return value into the required type. To allocate an array, we can use syntax such as `new int[<array_size>]`.
+
+
+`delete` works the same way as `free`. To delete a pointer to a block of data (array), use square brackets, like `delete[] pointerVar;`.
+
+
+#### 4.12 Calloc and Realloc
+
+`calloc()` and `realloc()` are two other functions that deal with dynamic memory allocation. Let's first look at the wrking of `calloc()` using a code example:
+
+```cpp
+#include <iostream>
+using std::cout;
+using std::endl;
+
+int main()
+{
+    int *ptr = (int *)calloc(1, sizeof(int));
+    cout << "Address to which ptr points: " << ptr << "\nValue stored there after calloc: " << *ptr << endl;
+    *ptr = 69;
+    cout << "Value stored at *ptr after manual initialisation: " << *ptr << endl;
+    free(ptr);
+
+    int *ptr2 = (int *)calloc(3, sizeof(int));
+    cout << "Address to which ptr2 points: " << ptr2 << "\nValue stored there after calloc:\n";
+    for (int i = 0; i < 3; i++)
+    {
+        cout << ptr2[i] << " ";
+    }
+
+    ptr2[0] = 69;
+    ptr2[1] = 4;
+    ptr2[2] = 20;
+    cout << "\nValues stored at ptr2 after initialisation:\n";
+    for (int i = 0; i < 3; i++)
+    {
+        cout << ptr2[i] << " ";
+    }
+    free(ptr2);
+
+    return 0;
+}
+```
+
+`calloc()` is defined as: `void *calloc(size_t num, size_t size)`, which means we have to pass the number of memory blocks to be allocated, along with the size of each block (in line 7, `calloc(1, sizeof(int))` will allocate 1 block of 4B). `calloc` then returns a void pointer to the allocated memory, and then we cast it to the correct type.
+
+
+One obvious difference between calloc and malloc is the passing of number of memory blocks as an argument. The other difference is that calloc will pre-initialise all the allocated memory blocks with value 0. This can be observed in the output of lines 15-18 in the above snippet.
+
+
+Let's now look at the working of `realloc()`:
+
+```cpp
+#include <iostream>
+using std::cin;
+using std::cout;
+using std::endl;
+
+int main()
+{
+    int *ptr1, *ptr2, *ptr3;
+    ptr1 = (int *)malloc(sizeof(int) * 5);
+
+    for (int i = 1; i <= 5; i++)
+    {
+        ptr1[i - 1] = i;
+    }
+
+    // Now what if we'd like to extend this by 5 more elements? Let's use a new pointer for that.
+    ptr2 = (int *)realloc(ptr1, 2 * sizeof(int) * 5);
+
+    cout << "\nPrevious block addr: " << ptr1 << "\nNew block addr: " << ptr2 << "\nValues at ptr2: ";
+
+    for (int i = 0; i < 10; i++)
+    {
+        cout << ptr2[i] << " ";
+    }
+
+    // Now what if we want to reduce the size of this array?
+    ptr3 = (int *)realloc(ptr1, sizeof(int) * 5);
+
+    cout << "\nPrevious block addr: " << ptr2 << "\nNew block addr: " << ptr3 << "\nValues at ptr3: ";
+
+    for (int i = 0; i < 5; i++)
+    {
+        cout << ptr3[i] << " ";
+    }
+
+    free(ptr1);
+    free(ptr2);
+    free(ptr3);
+
+    return 0;
+}
+```
+
+`realloc()` is defined as: `void *realloc(void *ptr, size_t)`.
+
+It is used to reallocate blocks of memory, i.e. dynamically increase or decrease the size of a memory block. It takes two arguments: a pointer to the memory block which is to be manipulated, and an unsigned integral value for the size to which the block must be set.
+
+
+As you can see, in line 17 of the snippet above, we call realloc on an int array of size 5. We change its size to `2 * sizeof(int) * 5`, which extends it to 40B, i.e. 10 integers.
+
+
+When we print the values stored in this new block of 10 integers, the first five values are those which we initialised before, but the last 5 are garbage/unknown values, which tells us that realloc does not initialise the allocated block to any size.
+
+
+Next, we changed the size back to 5 integers and used a new pointer to point to this array. The values there are again the original ones which we had initialised.
+
+
+> In this example, I have stored reallocated values in different pointers. However, realloc is usually used to mutate the value of an original pointer, so it is okay to store these values in the same pointer. This is usually also more useful than using different ptrs.
+
+
+> Note that if you store reallocated values in different pointers after reducing the size of the array, the original pointer will still point to the original block. In the code example above, after we set `ptr3 =  (int *)realloc(sizeof(int) * 5)`, `ptr2` would still point to the block of 10 integers that we had allocated in line 17. This behaviour can make pointers dangerous to work with sometimes, since reading/writing values at memory locations that have not been allocated to you is not safe, and might cause the program to crash or some other application's memory data to be overwritten. Always remember to be careful when dealing with memory!
+
+
+## 5. Pointers as function return types
+Since a pointer is just another datatype, functions can be written to return memory addresses. This is useful when you don't want to take up too much memory in your function. Let's look at an example:
+
+
+```cpp
+#include <iostream>
+using std::cout;
+using std::endl;
+
+int *add(int *num1, int *num2)
+{
+    int *sum = (int *)malloc(sizeof(int));
+    *sum = *num1 + *num2;
+
+    return sum;
+}
+
+int main()
+{
+    int num1 = 60;
+    int num2 = 9;
+    int *sum = add(&num1, &num2);
+
+    cout << "sum is: " << *sum << endl;
+
+    return 0;
+}
+```
+
+
+In the example, we have defined a function `*add(int *, int *)` which takes two referential arguments and returns a pointer to integer. (This function is called by reference and teh return value is stored in a pointer in the main function)
+
+
+But why have we used dynamic memory in the function there? This is because, when the called function is done executing in the stack, the memory it used is deallocated. When a different function is called in its place, the memory that it used may be allocated to the new called function. This will cause the value we stored in *sum to be overwritten. This may be observed if we don't use dynamic memory and call a different function before printing the sum in main:
+
+
+```cpp
+#include <iostream>
+using std::cout;
+using std::endl;
+
+void sayHello()
+{
+    cout << "Hello World :)" << endl;
+}
+
+int *add(int *num1, int *num2)
+{
+    int *sum = *num1 + *num2;
+    return sum;
+}
+
+int main()
+{
+    int num1 = 60;
+    int num2 = 9;
+    int *sum = add(&num1, &num2);
+
+    sayHello();
+
+    cout << "sum is: " << *sum << endl; // Output: Some garbage value, as the sum pointer has already been deallocated and value overwritten.
+
+    return 0;
+}
+```
