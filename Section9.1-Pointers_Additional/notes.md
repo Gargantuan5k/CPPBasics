@@ -1251,3 +1251,37 @@ int main()
     return 0;
 }
 ```
+
+
+## 6. Pointers to Functions
+Just as pointers can point to different primitive datatypes such as integers, characters etc, they can also point to the address of functions. What exactly is the address of a function? To understand this let's think about the way instructions are stored and executed in memory.
+
+
+When we write code in a language such as C or C++, the compiler will generate machine code in binary that the computer can read and execute. These machine instructions are stored in the memory, within the *Code (or text)* segment. Each instruction has its own memory address and instructions are stored in a contiguous block, and executed one after the other. So for example, after a 4 byte instruction at address `204` is done executing, the machine moves on to the next instruction at `208`.
+
+
+This order, can, however be changed if one of the instructions tells the machine to jump to a different instruction in memory. This is exactly what functions do.
+
+
+Since functions are stored in memory just like any other value, they can be referenced by pointers. The syntax for function pointers is described in the example:
+
+```cpp
+#include <iostream>
+using std::cout;
+using std::endl;
+
+int addNums(int a, int b)
+{
+    return a + b;
+}
+
+int main()
+{
+    int (*funcPtr)(int, int) = &addNums; // or just = addNums;
+    int niceNumber = (*funcPtr)(60, 9); // or just funcPtr(60, 9);
+
+    cout << niceNumber << endl;
+
+    return 0;
+}
+```
