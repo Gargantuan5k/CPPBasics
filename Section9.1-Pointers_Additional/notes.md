@@ -111,12 +111,12 @@ In most modern day compilers, datatypes are given sizes as follows:
 
 Taking an integer as example, say `int a = 1025;` It may be stored as follows:
 
-**Byte Number** | **Value Stored** | **Address (int)**     | **Address (hex)** |
-----------------|------------------|-----------------------|-------------------|
-`Byte 3`        | `00000000`       | `6422283`             | `61ff08`          |
-`Byte 2`        | `00000000`       | `6422282`             | `61ff09`          |
-`Byte 1`        | `00000100`       | `6422281`             | `61ff0a`          |
-`Byte 0`        | `00000001`       | `6422280`             | `61ff0b`          |
+| **Byte Number** | **Value Stored** | **Address (int)** | **Address (hex)** |
+| --------------- | ---------------- | ----------------- | ----------------- |
+| `Byte 3`        | `00000000`       | `6422283`         | `61ff08`          |
+| `Byte 2`        | `00000000`       | `6422282`         | `61ff09`          |
+| `Byte 1`        | `00000100`       | `6422281`         | `61ff0a`          |
+| `Byte 0`        | `00000001`       | `6422280`         | `61ff0b`          |
 
 Now, when we access the variable with a pointer:
 ```cpp
@@ -154,7 +154,7 @@ int main()
 For this example, let's say that the memory for each variable is allocated as follows:
 
 | Variable Name | Memory Address (decimal) | Memory address (hex) |
-|---------------|--------------------------|----------------------|
+| ------------- | ------------------------ | -------------------- |
 | `(int) x`     | `200`                    | `c8`                 |
 | `(int*) p`    | `210`                    | `d2`                 |
 | `(int**) q`   | `220`                    | `dc`                 |
@@ -310,7 +310,7 @@ int main()
 We declared an integer array of length 5. In modern compilers, integers are given `4B` of storage. This means our array might look something like this in memory:
 
 | Variable Name | Memory Address (decimal) | Memory address (hex) |
-|---------------|--------------------------|----------------------|
+| ------------- | ------------------------ | -------------------- |
 | `myArray[0]`  | `200`                    | `c8`                 |
 | `myArray[1]`  | `204`                    | `cc`                 |
 | `myArray[2]`  | `208`                    | `d0`                 |
@@ -644,7 +644,7 @@ char myStr[] = "Lorem";
 This may be stored in memory as follows:
 
 | Character | Memory Address |
-|-----------|----------------|
+| --------- | -------------- |
 | `'L'`     | `c8`           |
 | `'o'`     | `c9`           |
 | `'r'`     | `ca`           |
@@ -778,7 +778,7 @@ int twoDimensional[2][3];
 This declares an integer array of length 2, and each item of that array is an integer array of length 3. The total size of this array will be 3 * 4 * 2 = 24 bytes. It will be stored in memory as follows: (Address values assumed)
 
 | Address (int)   | Array item          | Value Stored             |
-|-----------------|---------------------|--------------------------|
+| --------------- | ------------------- | ------------------------ |
 | `400-411 (400)` | `twoDimensional[0]` | `twoDimensional[0][0-2]` |
 | `412-423 (412)` | `twoDimensional[1]` | `twoDimensional[1][0-2]` |
 
@@ -850,7 +850,7 @@ int (*ptr)[2][3] = primes;
 
 This array may be arranged as follows:
 | Address (int)   | Array item (1D) | Value Stored (2D) | Value Stored inside 2D array (3D) |
-|-----------------|-----------------|-------------------|-----------------------------------|
+| --------------- | --------------- | ----------------- | --------------------------------- |
 | `400-423 (400)` | `primes[0]`     | `primes[0][0-1]`  | `primes[0][0-1][0-2]`             |
 | `424-447 (424)` | `primes[1]`     | `primes[1][0-1]`  | `primes[1][0-1][0-2]`             |
 
@@ -1285,3 +1285,196 @@ int main()
     return 0;
 }
 ```
+
+### 6.1 Function pointers & Callbacks
+
+In the previous section we wrote a snippet to illustrate how function pointers work. However, simply using a function pointer to dereference it and call the fucntion is pointless: we could just directly call the declared function instead. The real usecase of function pointers lies in the fact that, being pointers, they can be passed as arguments to functions. A function can accept a func pointer as an argument, and call-back to it later. Illustrated below:
+
+
+```cpp
+#include <iostream>
+
+void sayHello(std::string name)
+{
+    std::cout << "Hello " << name;
+}
+
+void callingFunction(void (*funcptr)(std::string))
+{
+    funcptr("World");
+}
+
+int main()
+{
+    void (*ptr)(std::string) = &sayHello;
+    callingFunction(ptr);
+    // can also pass the pointer directly: callingFunction(sayHello); as name of function without () returns address
+    return 0;
+}
+```
+
+While this does show a use of function pointers, this is still not a very realistic use-case; `sayHello()` can also be called within the `main()` scope directly without using callbacks. Let us look at an actual scenario where callbacks are useful: Sorting Algorithms.
+
+
+#### <big> 6.1.1 Bubble Sort (Without using callbacks) </big>
+
+The [Bubble Sort Algorithm](https://en.wikipedia.org/wiki/Bubble_sort) (or sinking sort) is a simple sort algorithm that repeatedly iterates through an array, and swaps its elements if they are not in the correct order. This works by comparison logic, and is named "bubble sort" because of the way elements 'bubble' their way to the top of the array. This may be implemented as below:
+
+```cpp
+#include <iostream>
+using std::cout;
+using std::endl;
+
+void bubbleSort(int array[], int length, bool ascDescFlag = true)
+{
+    int temp, i, j;
+    for (i = 0; i < length; i++)
+    {
+        for (j = 0; j < length - 1; j++)
+        {
+            if (ascDescFlag) // ascending if ascDescFlag == true
+            {
+                if (array[j] > array[j + 1]) // sort ascending
+                {
+                    // swapping logic
+                    temp = array[j];
+                    array[j] = array[j + 1];
+                    array[j + 1] = temp;
+                }
+            }
+            else // descending if ascDescFlag == false
+            {
+                if (array[j] < array[j + 1]) // sort descending
+                {
+                    // swapping logic
+                    temp = array[j];
+                    array[j] = array[j + 1];
+                    array[j + 1] = temp;
+                }
+            }
+        }
+    }
+}
+
+int main()
+{
+    int arr[] = {3, 1, 8, -3, 7, 9, 2, 4, 5, 2, 1, 8, 9, 2, 4, 5, 3};
+    bubbleSort(arr, (sizeof(arr) / sizeof(arr[0])));
+    for (auto i : arr)
+    {
+        cout << i << " ";
+    }
+
+    return 0;
+}
+```
+
+This code works perfectly fine, and sorts the given array properly. However you will notice that we have to rewrite the comparison and swapping logic for both the ascending and descending sort logic, here:
+
+```cpp
+if (ascDescFlag) // ascending if ascDescFlag == true
+{
+    if (array[j] > array[j + 1]) // sort ascending
+    {
+        // swapping logic
+        temp = array[j];
+        array[j] = array[j + 1];
+        array[j + 1] = temp;
+    }
+}
+else // descending if ascDescFlag == false
+{
+    if (array[j] < array[j + 1]) // sort descending
+    {
+        // swapping logic
+        temp = array[j];
+        array[j] = array[j + 1];
+        array[j + 1] = temp;
+    }
+}
+```
+
+#### <big> 6.1.2 Bubble Sort (using callbacks) </big>
+
+All of this can be avoided by using callbacks. If you look at our logic here, if we want to sort ascending, we are checking to see if `array[j] > array[j + 1]`, and the opposite to sort descending. The logic for swapping the elements is the same in both the cases. This repetition can be avoided by writing separate comparison logic functions for ascending and descending sort, and passing them as arguments to the actual sorting function.
+
+
+Since ascending requires `array[j] > array[j + 1]`, our logic could look like:
+
+```cpp
+bool ascending(int a, int b)
+{
+    return a > b;
+}
+```
+
+And for descending which requires `array[j] < array[j + 1]`:
+
+```cpp
+bool descending(int a, int b)
+{
+    return a < b;
+}
+```
+
+These can then be passed as pointers to the sorting function. The code can be rewritten as follows:
+
+
+```cpp
+#include <iostream>
+using std::cout;
+
+bool ascending(int a, int b)
+{
+    return a > b;
+}
+
+bool descending(int a, int b)
+{
+    return a < b;
+}
+
+void bubbleSort(int arr[], int length, bool (*compare)(int, int))
+{
+    int i, j, temp;
+
+    for (i = 0; i < length; i++)
+    {
+        for (j = 0; j < length - 1; j++)
+        {
+            if (compare(arr[j], arr[j + 1]))
+            {
+                temp = arr[j];
+                arr[j] = arr[j + 1];
+                arr[j + 1] = temp;
+            }
+        }
+    }
+}
+
+int main()
+{
+    int arr[] = {3, 4, 1, 5, 2};
+    bubbleSort(arr, sizeof(arr) / sizeof(arr[0]), ascending /* or descending */); 
+
+    for (auto i : arr)
+        cout << i << " ";
+
+    return 0;
+}
+```
+
+
+Much cleaner, avoids repetition. As you can see, the `bubbleSort()` function now accepts a `bool` function pointer (`bool (*compare)(int, int)`), calls back to it for the comparison logic, and dynamically sorts both ascending and descending without having to repeat any code.
+
+
+```cpp
+if (compare(arr[j], arr[j + 1]))
+{
+    temp = arr[j];
+    arr[j] = arr[j + 1];
+    arr[j + 1] = temp;
+}
+```
+
+`compare(arr[j], arr[j + 1])` will return `1` if the pointer passed was `&ascending`, and `0` otherwise. This allows for proper sorting of the given array.
