@@ -2,14 +2,16 @@
 .Description
 A PowerShell Script to setup a new Section directory for this project
 #>
-param ([string] $Name="New Section", [string] $Com="n", [string] $Path=".")
+param ([string] $Name="New Section", [switch] $Commit, [switch] $Push, [string] $Path=".")
 
-Write-Host "Running new dir setup..." -fore yellow
+$l = (Get-Location).Path
 
-New-Item -Path $Path -Name $Name -ItemType "directory" | Out-Null
+Write-Host "Running setup for new directory..." -fore yellow
+
+New-Item -Path $Path -Name $Name -ItemType "Directory" | Out-Null
 Set-Location $Path\$Name  | Out-Null
 
-New-Item -Path . -Name "bin" -ItemType "directory" | Out-Null
+New-Item -Path . -Name "bin" -ItemType "Directory" | Out-Null
 New-Item -Path . -Name ".gitignore" -Itemtype "File" | Out-Null
 # New-Item -Path . -Name "run.ps1" -ItemType "File" | Out-Null
 
@@ -19,12 +21,17 @@ Set-Location ./bin | Out-Null
 Write-Host "Created new directory '$($Name) in $($Path)\'" -fore green
 Write-Host "Created file .gitignore in $($Path)\$($Name)\" -fore green
 
-if ($Com -eq "y") {
+if ($Commit) {
+    Set-Location $($l)
     $Msg = "Create $($Name) directory"
-    git add . | Out-Null
+    git add "$($Path)/$($Name)/" | Out-Null
     git commit -m $Msg | Write-Host
-    git push origin master | Write-Host
-    Write-Host "Committed to Git and pushed to remote 'origin' with commit message:", $Msg -fore blue
+    Write-Host "Committed changes to Git with message:", $Msg -fore blue
+
+    if ($Push) {
+        git push origin master | Write-Host
+        Write-Host "Pushed committed changes to remote repository" -fore blue
+    }
 }
 
 Write-Host "Done!" -fore green
