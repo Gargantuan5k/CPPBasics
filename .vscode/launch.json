@@ -23,7 +23,7 @@
                     "ignoreFailures": true
                 }
             ],
-            "preLaunchTask": "(C++ Debugging) build active file using g++"
+            "preLaunchTask": "(g++.exe) build active C/C++ file for debugging"
         }
     ]
 }

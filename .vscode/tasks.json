@@ -3,7 +3,7 @@
     "tasks": [
         {
             "type": "cppbuild",
-            "label": "(C++) build active file using g++",
+            "label": "(g++.exe) build active C/C++ file",
             "command": "C:/MinGW/bin/g++.exe",
             "args": [
                 "-g",
@@ -25,7 +25,7 @@
         },
         {
             "type": "cppbuild",
-            "label": "(C++ Debugging) build active file using g++",
+            "label": "(g++.exe) build active C/C++ file for debugging",
             "command": "C:/MinGW/bin/g++.exe",
             "args": [
                 "-g",
