@@ -1,18 +1,19 @@
 #include <iostream>
+
 using namespace std;
 
-void increment(int *ptr)
+void increment(int &num)
 {
-    (*ptr) += 1;
-    cout << "Address of num in increment func: " << &*ptr << endl;
+    num++;
+    cout << "Address of num in increment func: " << &num << endl;
 }
 
 int main()
 {
-    int num = 10;
-    increment(&num);
-    cout << "Address of num in main func: " << &num << endl;
-    cout << "Value of num after calling function: " << num << endl;
+    int x = 10;
+    increment(x);
+    cout << "x = " << x << endl;
+    cout << "Address of num in main func: " << &x << endl;
 
     return 0;
 }

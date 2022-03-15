@@ -198,7 +198,7 @@ cout << ***r // prints the value stored at **r, i.e. 5. This is the same as cout
 
 ---
 
-## 2. A pointer use-case: As function arguments (Call by value and call by reference)
+## 2. A pointer use-case: As function arguments (Call by value and call by address)
 Let's take an example of a script:
 ```cpp
 #include <iostream>
@@ -263,7 +263,8 @@ So in the snippet above, the Stack section will have two separate spaces for our
 
 This is called **calling by value**, i.e. calling the function using a value of our variable. In this case, calling by value won't be very helpful to us, as we want to mutate the actual value of the variable inside the `main` scope.
 
-Instead of doing this, we may **call by reference**. In that case, out `increment()` function would take a pointer or a reference as an argument. This will enable it to directly manipulate the value stored in a given memory address, thus fulfilling its purpose.
+Instead of doing this, we may **call by address**. In that case, out `increment()` function would take a pointer as an argument. This will enable it to directly manipulate the value stored in a given memory address, thus fulfilling its purpose.
+
 
 ```cpp
 void increment(int *ptr)
@@ -292,7 +293,29 @@ Address of num in increment func: 0x61ff0c
 Address of num in main func: 0x61ff0x
 Value of num after calling function: 11
 ```
-As you can see, this behaved as we needed it to. The `increment` function accesses the actual memory address of the variable and changes its value, which is made possible by calling the function by reference.
+As you can see, this behaved as we needed it to. The `increment` function accesses the actual memory address of the variable and changes its value, which is made possible by calling the function by address.
+
+
+We may even **call by reference**, i.e. accept references as parameters in the function and then pass in the variable inside the calling function. This will allow us to mutate the original value in the same way as calling by address. For example:
+
+
+```cpp
+void increment(int &num)
+{
+    num++;
+    cout << "Address of num in increment func: " << &num << endl;
+}
+
+int main()
+{
+    int x = 10;
+    increment(x);
+    cout << "x = " << x << endl;
+    cout << "Address of num in main func: " << &x << endl;
+
+    return 0;
+}
+```
 
 ---
 ## 3. Pointers and Arrays
