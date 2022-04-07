@@ -44,6 +44,28 @@
                 "isDefault": false
             },
             "detail": "compiler: C:/MinGW/bin/g++.exe, user-created build task for debugging"
+        },
+        {
+            "type": "shell",
+            "label": "(gcc.exe) build active C file",
+            "command": "C:/MinGW/bin/gcc.exe",
+            "args": [
+                "-g",
+                "${file}",
+                "-o",
+                "${fileDirname}\\bin\\${fileBasenameNoExtension}.exe"
+            ],
+            "options": {
+                "cwd": "C:/MinGW/bin"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "detail": "compiler: C:/MinGW/bin/gcc.exe, user-created build task"
         }
     ]
 }
