@@ -1101,7 +1101,7 @@ This code works exactly the same as the previous C-Style example. However, we ha
 
 #### 4.12 Calloc and Realloc
 
-`calloc()` and `realloc()` are two other functions that deal with dynamic memory allocation. Let's first look at the wrking of `calloc()` using a code example:
+`calloc()` and `realloc()` are two other functions that deal with dynamic memory allocation. Let's first look at the working of `calloc()` using a code example:
 
 ```cpp
 #include <iostream>
@@ -1207,6 +1207,32 @@ Next, we changed the size back to 5 integers and used a new pointer to point to 
 
 
 > Note that if you store reallocated values in different pointers after reducing the size of the array, the original pointer will still point to the original block. In the code example above, after we set `ptr3 =  (int *)realloc(sizeof(int) * 5)`, `ptr2` would still point to the block of 10 integers that we had allocated in line 17. This behaviour can make pointers dangerous to work with sometimes, since reading/writing values at memory locations that have not been allocated to you is not safe, and might cause the program to crash or some other application's memory data to be overwritten. Always remember to be careful when dealing with memory!
+
+> The following C snippet displays the functionality of malloc, realloc and free. Here, these functions have been used to create a dynamically expanding array, so that the user can input any number of elements to it. NOTE that such an implementation is redundant in C++, as you can simply use `std::vector` instead.
+
+```c
+#include <stdio.h>
+#include <stdlib.h> /* for malloc and realloc */
+
+int main(int argc, char** argv)
+{
+    int *arr = (int *)malloc(sizeof(int)); /* allocate 4B of memory (one integer) in heap */
+    int num, count = 1;
+
+    printf("Enter any number of integers, and 'ok' to confirm: ");
+    while (scanf("%d", &num))
+    {
+        *(arr + count - 1) = num; // same as arr[count - 1] = num
+        count++;
+        arr = (int *)realloc(arr, (sizeof(int) * count)); // dynamically increase the size of the array by 1 each time, to allow for more values
+    }
+
+    printf("\nElements entered:");
+    for (int i = 0; i < count - 1; i++) printf("%d ", arr[i]);
+
+    return 0;
+}
+```
 
 
 ## 5. Pointers as function return types
