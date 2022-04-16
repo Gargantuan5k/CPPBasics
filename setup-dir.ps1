@@ -13,6 +13,7 @@ Set-Location $Path\$Name  | Out-Null
 
 New-Item -Path . -Name "bin" -ItemType "Directory" | Out-Null
 New-Item -Path . -Name ".gitignore" -Itemtype "File" | Out-Null
+New-Item -Path .\bin -Name "debug" -Itemtype "Directory" | Out-Null
 # New-Item -Path . -Name "run.ps1" -ItemType "File" | Out-Null
 
 Write-Output "/*.exe" "/*.out" | Out-File -FilePath ./.gitignore | Out-Null
