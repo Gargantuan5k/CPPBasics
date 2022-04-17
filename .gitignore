@@ -1,5 +1,6 @@
 /Extra-Scripts/
 /.cspell/
 **/bin/
+**/**/bin/
 /git_commit.ps1
 /scripts/
