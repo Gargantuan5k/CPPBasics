@@ -7,4 +7,4 @@ for dir in $(readlink -f $(find $wd -maxdepth 1 -mindepth 1 -name "Section*")); 
         g++ $(readlink -f $file) -o "$dir/bin/linux/$(basename $file .cpp)"
     done
 done
-echo "Compiled all .cpp files inside all Section directories (not "
+echo "\033[0;34mCompiled all .cpp files inside all Section directories (not in subdirectories)\033[0m"
