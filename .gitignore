@@ -2,3 +2,4 @@
 /.cspell/
 **/bin/debug/
 /git_commit.ps1
+/scripts/

@@ -3,7 +3,7 @@
     "tasks": [
         {
             "type": "cppbuild",
-            "label": "(g++.exe) build active C/C++ file",
+            "label": "(WINDOWS) (g++.exe) build active C/C++ file",
             "command": "C:/MinGW/bin/g++.exe",
             "args": [
                 "-g",
@@ -19,13 +19,13 @@
             ],
             "group": {
                 "kind": "build",
-                "isDefault": true
+                "isDefault": false
             },
             "detail": "compiler: C:/MinGW/bin/g++.exe, user-created build task"
         },
         {
             "type": "cppbuild",
-            "label": "(g++.exe) build active C/C++ file for debugging",
+            "label": "(WINDOWS) (g++.exe) build active C/C++ file for debugging",
             "command": "C:/MinGW/bin/g++.exe",
             "args": [
                 "-g",
@@ -44,6 +44,50 @@
                 "isDefault": false
             },
             "detail": "compiler: C:/MinGW/bin/g++.exe, user-created build task for debugging"
+        },
+        {
+            "type": "cppbuild",
+            "label": "(LINUX) (g++) build active C/C++ file",
+            "command": "/usr/sbin/g++",
+            "args": [
+                "-g",
+                "${file}",
+                "-o",
+                "${fileDirname}/bin/linux//${fileBasenameNoExtension}"
+            ],
+            "options": {
+                "cwd": "/usr/sbin/"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "detail": "compiler: /usr/sbin/g++, user-created build task"
+        },
+        {
+            "type": "cppbuild",
+            "label": "(LINUX) (g++) build active C/C++ file for debugging",
+            "command": "/usr/sbin/g++",
+            "args": [
+                "-g",
+                "${file}",
+                "-o",
+                "${fileDirname}/bin/debug/linux/${fileBasenameNoExtension}"
+            ],
+            "options": {
+                "cwd": "/usr/sbin/g++"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "detail": "compiler: /usr/sbin/g++, user-created build task for debugging"
         },
         {
             "type": "shell",
